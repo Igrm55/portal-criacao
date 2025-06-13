@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presente Eterno - Portal de Criação</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- SCRIPT DO UPLOADCARE - Essencial para o upload de arquivos -->
+    <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js" charset="utf-8"></script>
+    
+    <style>
+        :root {
+            --cor-fundo: #0a101f;
+            --cor-primaria: #ff0080;
+            --cor-secundaria: #ff69b4;
+            --cor-dourado-premium: #FFD700;
+            --cor-laco-amor: #cba3ff;
+            --cor-branco-puro: #ffffff;
+            --cor-branco-suave: #e0e7ef;
+            --cor-cinza-claro: #b0bac9;
+            --cor-fundo-card: rgba(30, 41, 59, 0.8);
+            --borda-raio: 16px;
+            --gradiente-principal: linear-gradient(90deg, var(--cor-primaria), var(--cor-secundaria));
+            --gradiente-ia: linear-gradient(90deg, #4d94ff, #9933ff);
+            --cor-erro: #FF4D4D;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--cor-fundo);
+            color: var(--cor-branco-suave);
+            line-height: 1.7;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 52.5 L12.5 35 Q12.5 17.5 30 25 Q47.5 17.5 47.5 35 Z' fill='rgba(160,0,255,0.03)'/%3E%3C/svg%3E");
+        }
+        #form-container { width: 100%; max-width: 700px; background: var(--cor-fundo-card); backdrop-filter: blur(10px); border-radius: var(--borda-raio); padding: clamp(1.5rem, 5vw, 2.5rem); border: 1px solid var(--cor-secundaria); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
+        .form-header { text-align: center; margin-bottom: 2rem; }
+        .form-header h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(1.8rem, 5vw, 2.2rem); color: var(--cor-branco-puro); margin-bottom: 0.5rem; }
+        .form-header p { color: var(--cor-cinza-claro); font-size: 1rem; max-width: 500px; margin: auto; }
+        .congrats-message { background: rgba(255, 215, 0, 0.1); border-left: 4px solid var(--cor-dourado-premium); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: left; }
+        .congrats-message strong { color: var(--cor-dourado-premium); }
+        #progress-bar { display: flex; list-style: none; margin-bottom: 2rem; position: relative; justify-content: space-between; padding: 0; }
+        #progress-bar .step { text-align: center; position: relative; width: 100%; color: var(--cor-cinza-claro); font-weight: 500; font-size: 0.8rem; }
+        #progress-bar .step .dot { height: 25px; width: 25px; border: 2px solid var(--cor-cinza-claro); border-radius: 50%; display: inline-block; margin-bottom: 5px; transition: all 0.4s ease; }
+        #progress-bar .step.active .dot, #progress-bar .step.completed .dot { background: var(--gradiente-principal); border-color: var(--cor-primaria); transform: scale(1.2); }
+        #progress-bar .step.active, #progress-bar .step.completed { color: var(--cor-branco-puro); }
+        #progress-bar::before, #progress-line { content: ''; position: absolute; top: 12px; left: 0; height: 3px; width: 100%; background: var(--cor-cinza-claro); z-index: -1; }
+        #progress-line { background: var(--gradiente-principal); width: 0%; transition: width 0.4s ease; }
+        .form-step { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .form-step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .form-group { margin-bottom: 1.5rem; position: relative; }
+        .form-group label { display: block; margin-bottom: 0.75rem; font-weight: 600; font-size: 1.1rem; color: var(--cor-branco-suave); }
+        .form-group small { display: block; color: var(--cor-cinza-claro); font-size: 0.85rem; margin-top: -0.5rem; margin-bottom: 0.75rem; line-height: 1.5; }
+        input[type="text"], input[type="url"], textarea, select { width: 100%; padding: 0.9rem; border-radius: 8px; border: 1px solid var(--cor-cinza-claro); background-color: var(--cor-fundo); color: var(--cor-branco-puro); font-size: 1rem; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--cor-primaria); box-shadow: 0 0 10px var(--cor-primaria); }
+        textarea { resize: vertical; min-height: 120px; }
+        .package-selection { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 600px) { .package-selection { grid-template-columns: repeat(3, 1fr); } }
+        .package-option { position: relative; }
+        .package-option input[type="radio"] { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; }
+        .package-label { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--cor-fundo); border: 2px solid var(--cor-cinza-claro); border-radius: var(--borda-raio); padding: 1.5rem 1rem; text-align: center; transition: all 0.3s ease; height: 100%; }
+        .package-label i { font-size: 2.5rem; margin-bottom: 0.75rem; transition: all 0.3s ease; }
+        .package-label .package-name { font-weight: 700; color: var(--cor-branco-puro); }
+        .package-option input:checked + .package-label { border-color: var(--cor-primaria); box-shadow: 0 0 15px var(--cor-primaria); transform: translateY(-5px); }
+        .package-option input:checked + .package-label i { transform: scale(1.1); }
+        #laco-label i { color: var(--cor-laco-amor); }
+        #sinfonia-label i { color: var(--cor-primaria); }
+        #universo-label i { color: var(--cor-dourado-premium); }
+        .package-option input:checked + #sinfonia-label i { background: var(--gradiente-principal); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .btn-group { display: flex; justify-content: space-between; margin-top: 2rem; gap: 1rem; }
+        .btn { padding: 0.9rem 2rem; border: none; border-radius: 50px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; }
+        .btn-primary { background: var(--gradiente-principal); background-size: 200% auto; color: var(--cor-branco-puro); }
+        .btn-primary:hover { transform: scale(1.05); background-position: right center; box-shadow: 0 5px 15px var(--cor-primaria); }
+        .btn-secondary { background-color: transparent; border: 2px solid var(--cor-cinza-claro); color: var(--cor-cinza-claro); }
+        .btn-secondary:hover { border-color: var(--cor-branco-suave); color: var(--cor-branco-suave); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .hidden { display: none; }
+        #final-message { text-align: center; }
+        #final-message i { font-size: 4rem; margin-bottom: 1rem; }
+        #final-message.success i { color: var(--cor-dourado-premium); }
+        #final-message.error i { color: var(--cor-erro); }
+        #final-message h2 { margin-bottom: 1rem; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-content { background: var(--cor-fundo-card); padding: 2rem; border-radius: var(--borda-raio); border: 1px solid var(--cor-primaria); box-shadow: 0 0 30px rgba(255, 0, 128, 0.4); text-align: center; max-width: 90%; width: 500px; transform: scale(0.9); transition: transform 0.3s ease-in-out; }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-content h2 { margin-bottom: 1rem; color: var(--cor-branco-puro); }
+        .modal-content p { color: var(--cor-cinza-claro); margin-bottom: 1.5rem; white-space: pre-wrap; text-align: left; }
+        .modal-close-btn { background: var(--gradiente-principal); color: var(--cor-branco-puro); border: none; padding: 0.8rem 2rem; border-radius: 50px; cursor: pointer; font-weight: 700; transition: transform 0.2s; }
+        .modal-close-btn:hover { transform: scale(1.05); }
+
+        /* Estilos do Widget do Uploadcare */
+        .uploadcare--widget__button_type_open {
+            background: var(--cor-secundaria) !important;
+            color: var(--cor-branco-puro) !important;
+            border-radius: 8px !important;
+            padding: 0.8rem 1.5rem !important;
+            transition: all 0.3s ease !important;
+            border: none !important;
+        }
+        .uploadcare--widget__button_type_open:hover { transform: scale(1.05) !important; background: var(--cor-primaria) !important; }
+        .uploadcare--widget__button { font-family: 'Poppins', sans-serif !important; }
+        .uploadcare--panel, .uploadcare--dialog__content { border-radius: var(--borda-raio) !important; }
+    </style>
+</head>
+<body>
+
+    <div id="form-container">
+        <div class="form-header">
+            <h1><i class="fas fa-magic"></i> Portal de Criação</h1>
+            <p>Vamos dar vida à sua história! Siga os passos abaixo com carinho para construirmos uma memória inesquecível.</p>
+        </div>
+
+        <div id="form-content">
+            <ul id="progress-bar"></ul>
+            
+            <form id="creation-form" novalidate>
+                
+                <!-- Campos ocultos que receberão os links dos arquivos do Uploadcare -->
+                <!-- O valor deste campo será um JSON com um array de URLs das fotos -->
+                <input type="hidden" id="photo-links" name="links_das_fotos">
+                <input type="hidden" id="audio-link" name="link_do_audio">
+
+                <!-- Etapa 1: Boas-vindas e Pacote -->
+                <div class="form-step active" data-step-name="Início">
+                    <div class="form-group">
+                        <div class="congrats-message">
+                            <strong>Parabéns pela escolha magnífica!</strong> Você deu o primeiro passo para criar um presente que transcende o material e toca a alma. Estamos honrados em fazer parte disso.
+                        </div>
+                        <label for="nome">Seu primeiro nome</label>
+                        <input type="text" id="nome" name="nome_do_cliente" required placeholder="Ex: Igor">
+                    </div>
+                    <div class="form-group">
+                        <label>Qual pacote você adquiriu?</label>
+                        <div class="package-selection">
+                            <div class="package-option">
+                                <input type="radio" id="laco" name="pacote_escolhido" value="Laço de Amor" required>
+                                <label for="laco" class="package-label" id="laco-label">
+                                    <i class="fa-solid fa-ribbon"></i>
+                                    <span class="package-name">Laço de Amor</span>
+                                </label>
+                            </div>
+                            <div class="package-option">
+                                <input type="radio" id="sinfonia" name="pacote_escolhido" value="Nossa Sinfonia" required>
+                                <label for="sinfonia" class="package-label" id="sinfonia-label">
+                                    <i class="fa-solid fa-music"></i>
+                                    <span class="package-name">Nossa Sinfonia</span>
+                                </label>
+                            </div>
+                            <div class="package-option">
+                                <input type="radio" id="universo" name="pacote_escolhido" value="Universo Particular" required>
+                                <label for="universo" class="package-label" id="universo-label">
+                                    <i class="fa-solid fa-meteor"></i>
+                                    <span class="package-name">Universo Particular</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Etapa 2: A História -->
+                <div class="form-step" data-step-name="História" data-packages="laco,sinfonia,universo">
+                    <div class="form-group">
+                        <label for="historia">A História de Vocês</label>
+                        <small>Conte-me um pouco sobre vocês. Como se conheceram? Qual a memória mais engraçada ou emocionante?</small>
+                        <textarea id="historia" name="historia_do_casal" required></textarea>
+                    </div>
+                </div>
+
+                <!-- Etapa 3: Paleta de Cores -->
+                <div class="form-step" data-step-name="Cores" data-packages="laco,sinfonia,universo">
+                    <div class="form-group">
+                        <label for="paleta">Universo Visual e Cores</label>
+                        <small>Descreva o estilo visual que você imagina. É algo mais romântico com tons de rosa? Sofisticado com dourado e preto? Vibrante e colorido? Sinta-se à vontade para descrever.</small>
+                        <textarea id="paleta" name="paleta_de_cores" required placeholder="Ex: Gosto de um visual mais clean e elegante, com tons de azul marinho, branco e detalhes em dourado..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Etapa 4: Essência -->
+                <div class="form-step" data-step-name="Essência" data-packages="laco,sinfonia,universo">
+                    <div class="form-group">
+                        <label for="carta">Sua Declaração (A Carta)</label>
+                        <small>Escreva ou cole aqui o texto que será o coração do presente. (Opcional)</small>
+                        <textarea id="carta" name="carta_de_declaracao"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="data-inicio">Data de Início do Relacionamento</label>
+                        <small>Para o contador de tempo. Pode escrever como preferir (ex: 25/12/2020). (Opcional)</small>
+                        <input type="text" id="data-inicio" name="data_de_inicio" placeholder="DD/MM/AAAA">
+                    </div>
+                </div>
+
+                <!-- Etapa 5: Memórias (Upload de Fotos) -->
+                <div class="form-step" data-step-name="Memórias" data-packages="laco,sinfonia,universo">
+                    <div class="form-group">
+                        <label for="photo-uploader-input">Galeria de Momentos</label>
+                        <small id="photo-upload-limit">Envie suas fotos favoritas. O widget de upload cuidará de tudo. Pelo menos uma foto é obrigatória.</small>
+                        <div id="photo-uploader-container">
+                            <input type="hidden" role="uploadcare-uploader" id="photo-uploader-input" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Etapa 6: Itens da Sinfonia (Upload/Gravação de Áudio) -->
+                <div class="form-step" data-step-name="Sinfonia" data-packages="sinfonia,universo">
+                     <div class="form-group">
+                        <label>Sua Declaração em Áudio</label>
+                        <small>Você pode enviar um arquivo de áudio ou gravar sua voz na hora usando o botão abaixo. (Opcional)</small>
+                        <input type="hidden" role="uploadcare-uploader" id="audio-uploader-input" data-input-accept-types="audio/*" data-sources="local, camera"/>
+                    </div>
+                    <div class="form-group">
+                        <label>10 Mensagens Secretas para os Corações</label>
+                        <small>Escreva frases curtas e carinhosas. (Opcional)</small>
+                        <textarea id="mensagens_secretas" name="mensagens_secretas_para_coracoes" rows="5" placeholder="Escreva uma mensagem por linha..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Etapa 7: Itens do Universo -->
+                <div class="form-step" data-step-name="Universo" data-packages="universo">
+                    <div class="form-group">
+                        <label>Playlist (Até 5 músicas)</label>
+                        <small>Cole o link do Spotify ou YouTube de cada música, um por linha. (Opcional)</small>
+                         <textarea name="playlist_links" rows="5" placeholder="Link da Música 1&#10;Link da Música 2..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Mensagem Secreta com Senha (Opcional)</label>
+                        <input type="text" name="senha_da_mensagem_secreta" placeholder="Crie uma senha (Ex: apelido, data especial)"><textarea name="texto_da_mensagem_secreta" placeholder="Escreva aqui a mensagem super secreta" style="margin-top: 0.5rem;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Mapa Astral do Casal (Opcional)</label>
+                        <small>Precisamos dos signos para criar a mágica.</small>
+                        <input type="text" name="signo_1" placeholder="Signo da Pessoa 1 (Ex: Áries)" style="margin-bottom: 0.5rem;"><input type="text" name="signo_2" placeholder="Signo da Pessoa 2 (Ex: Touro)" style="margin-bottom: 0.5rem;">
+                    </div>
+                    <div class="form-group">
+                        <label for="pedido">Este presente é um pedido especial?</label>
+                        <select id="pedido" name="e_um_pedido_especial"><option value="nao">Não</option><option value="sim">Sim, é um pedido de namoro/casamento!</option></select>
+                    </div>
+                </div>
+
+                <!-- Etapa Final: Confirmação -->
+                <div class="form-step" data-step-name="Enviar">
+                    <div id="confirmation-step" style="text-align: center;">
+                        <i class="fas fa-paper-plane" style="font-size: 3rem; margin-bottom: 1rem; color: var(--cor-primaria);"></i>
+                        <h2>Tudo Pronto para Enviar!</h2>
+                        <p>Suas informações estão prontas. Clique no botão abaixo para finalizar e enviar seu pedido para mim.</p>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" id="prev-btn">Voltar</button>
+                    <button type="button" class="btn btn-primary" id="next-btn">Avançar</button>
+                    <button type="submit" class="btn btn-primary hidden" id="submit-btn">
+                        <i class="fas fa-rocket"></i> Enviar Pedido
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div id="final-message" class="hidden"></div>
+    </div>
+    
+    <!-- Modal de Alerta Genérico -->
+    <div id="alert-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modal-title">Atenção</h2>
+            <p id="modal-message">Mensagem de alerta.</p>
+            <button id="modal-close" class="modal-close-btn">Entendi</button>
+        </div>
+    </div>
+    
+    <script>
+    // --- CONFIGURAÇÕES GLOBAIS ---
+    // Sua chave pública do Uploadcare. É seguro deixá-la aqui.
+    const UPLOADCARE_PUBLIC_KEY = '3a3c239ad5001cd0441f'; 
+    UPLOADCARE_LOCALE = 'pt';
+    UPLOADCARE_TABS = 'file camera url gdrive dropbox';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- ELEMENTOS DO DOM ---
+        const form = document.getElementById('creation-form');
+        const formContent = document.getElementById('form-content');
+        const finalMessageContainer = document.getElementById('final-message');
+        const formSteps = Array.from(document.querySelectorAll('.form-step'));
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const packageOptions = document.querySelectorAll('input[name="pacote_escolhido"]');
+        const photoLinksInput = document.getElementById('photo-links');
+        const audioLinkInput = document.getElementById('audio-link');
+        const photoUploadLimitSmall = document.getElementById('photo-upload-limit');
+        
+        let photoWidget;
+        let currentStepIndex = 0;
+        let visibleSteps = [];
+
+        // --- LÓGICA DE UPLOAD (UPLOADCARE) ---
+        // Widget de áudio (permite apenas 1 arquivo)
+        const audioWidget = uploadcare.Widget('#audio-uploader-input', { 
+            publicKey: UPLOADCARE_PUBLIC_KEY, 
+            multiple: false,
+            audioOnly: true, // Garante que apenas áudio seja selecionado
+        });
+        audioWidget.onUploadComplete(fileInfo => { 
+            audioLinkInput.value = fileInfo.cdnUrl || ''; 
+        });
+        
+        // Função para configurar o widget de FOTOS com o limite correto
+        function setupPhotoWidget(limit) {
+            const container = document.getElementById('photo-uploader-container');
+            // Limpa o container e recria o input para o widget
+            container.innerHTML = `<input type="hidden" role="uploadcare-uploader" id="photo-uploader-input" />`;
+            
+            photoWidget = uploadcare.Widget('#photo-uploader-input', { 
+                publicKey: UPLOADCARE_PUBLIC_KEY, 
+                multiple: true, 
+                imagesOnly: true,
+                multipleMax: limit // Define o número máximo de arquivos diretamente
+            });
+            
+            // Validador do Uploadcare para o número de arquivos
+            photoWidget.validators.push(uploadcare.validators.filesNumber(1, limit));
+            
+            // NOVO: Processa o grupo de arquivos para obter links INDIVIDUAIS
+            photoWidget.onUploadComplete(group => {
+                if (!group) {
+                    photoLinksInput.value = JSON.stringify([]);
+                    return;
+                }
+
+                // Transforma as informações dos arquivos em um array de promessas
+                const filePromises = group.files().map(file => file.promise());
+
+                Promise.all(filePromises)
+                    .then(fileInfos => {
+                        // Extrai a URL de cada arquivo
+                        const urls = fileInfos.map(info => info.cdnUrl);
+                        // Armazena as URLs como uma string JSON no campo oculto
+                        photoLinksInput.value = JSON.stringify(urls);
+                        validateCurrentStep(); // Revalida o passo após o upload
+                    })
+                    .catch(error => {
+                        console.error("Erro ao processar o grupo de fotos:", error);
+                        showAlert('Erro no Upload', 'Houve um problema ao processar suas fotos. Por favor, tente novamente.');
+                        photoLinksInput.value = JSON.stringify([]);
+                    });
+            });
+
+             // Limpa o valor se o usuário remover os arquivos do widget
+            photoWidget.onChange(group => {
+                if (!group) {
+                    photoLinksInput.value = JSON.stringify([]);
+                }
+            });
+        }
+        
+        function updatePhotoLimit() {
+            const selectedPackage = document.querySelector('input[name="pacote_escolhido"]:checked');
+            let limit = 10;
+            let packageText = "este pacote";
+            if (selectedPackage) {
+                if (selectedPackage.id === 'laco') { 
+                    limit = 5; 
+                    packageText = "o pacote Laço de Amor";
+                } else { 
+                    limit = 10; 
+                    packageText = "os pacotes Sinfonia ou Universo";
+                }
+            }
+            photoUploadLimitSmall.textContent = `Envie suas fotos favoritas (limite de ${limit} para ${packageText}). Pelo menos uma foto é obrigatória.`;
+            setupPhotoWidget(limit);
+        };
+        
+        // --- LÓGICA DO FORMULÁRIO MULTI-ETAPAS ---
+        function filterVisibleSteps() {
+            const selectedPackageRadio = document.querySelector('input[name="pacote_escolhido"]:checked');
+            visibleSteps = [formSteps[0]]; // Primeira etapa sempre visível
+            if (selectedPackageRadio) {
+                const selectedPackageValue = selectedPackageRadio.id;
+                formSteps.forEach(step => {
+                    const packages = step.dataset.packages;
+                    const isFinalStep = step.dataset.stepName === 'Enviar';
+                    if (packages && packages.split(',').includes(selectedPackageValue) && !isFinalStep) {
+                        visibleSteps.push(step);
+                    }
+                });
+                visibleSteps.push(formSteps.find(step => step.dataset.stepName === 'Enviar'));
+            }
+            updateProgressBar();
+            // Atualiza o limite do widget de fotos sempre que os passos mudarem
+            if (visibleSteps.some(step => step.dataset.stepName === 'Memórias')) {
+                updatePhotoLimit();
+            }
+        }
+
+        function updateProgressBar() {
+            progressBar.innerHTML = '';
+            visibleSteps.forEach(step => {
+                const stepName = step.dataset.stepName;
+                const li = document.createElement('li');
+                li.className = 'step';
+                li.innerHTML = `<span class="dot"></span> ${stepName}`;
+                progressBar.appendChild(li);
+            });
+            const progressLine = document.createElement('div');
+            progressLine.id = 'progress-line';
+            progressBar.appendChild(progressLine);
+            updateProgressClasses();
+        }
+
+        function updateProgressClasses() {
+            const progressSteps = progressBar.querySelectorAll('.step');
+            const progressLine = document.getElementById('progress-line');
+            if (!progressLine) return;
+            progressSteps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < currentStepIndex) step.classList.add('completed');
+                else if (index === currentStepIndex) step.classList.add('active');
+            });
+            const completedDots = progressBar.querySelectorAll('.completed');
+            const widthPercentage = progressSteps.length > 1 ? (completedDots.length / (progressSteps.length - 1)) * 100 : 0;
+            progressLine.style.width = `${widthPercentage}%`;
+        }
+        
+        function showStep(stepIndex) {
+            formSteps.forEach(step => step.classList.remove('active'));
+            if (visibleSteps[stepIndex]) { visibleSteps[stepIndex].classList.add('active'); }
+            updateButtonVisibility();
+            updateProgressClasses();
+        }
+
+        function updateButtonVisibility() {
+            prevBtn.classList.toggle('hidden', currentStepIndex === 0);
+            nextBtn.classList.toggle('hidden', currentStepIndex === visibleSteps.length - 1);
+            submitBtn.classList.toggle('hidden', currentStepIndex !== visibleSteps.length - 1);
+        }
+
+        // --- VALIDAÇÃO DOS CAMPOS ---
+        function validateCurrentStep() {
+            const currentStep = visibleSteps[currentStepIndex];
+            if (!currentStep) return { isValid: false, message: "Erro: Etapa não encontrada." };
+            
+            const stepName = currentStep.dataset.stepName;
+            let errors = [];
+            
+            // Limpa estilos de erro anteriores
+            currentStep.querySelectorAll('label').forEach(l => l.style.color = '');
+            currentStep.querySelectorAll('input, textarea').forEach(i => i.style.borderColor = '');
+
+            function markError(element, message) {
+                errors.push(message);
+                const formGroup = element.closest('.form-group');
+                if (formGroup) {
+                    formGroup.querySelector('label').style.color = 'var(--cor-erro)';
+                    if(element.type !== 'radio' && element.type !== 'hidden') {
+                       element.style.borderColor = 'var(--cor-erro)';
+                    }
+                }
+            }
+            
+            // Valida campos específicos de cada etapa
+            if (stepName === 'Início') {
+                const nomeInput = document.getElementById('nome');
+                if (!nomeInput.value.trim()) {
+                    markError(nomeInput, '- O campo "Seu primeiro nome" é obrigatório.');
+                }
+                const pacoteChecked = document.querySelector('input[name="pacote_escolhido"]:checked');
+                if (!pacoteChecked) {
+                    markError(document.querySelector('input[name="pacote_escolhido"]'), '- É necessário escolher um pacote.');
+                }
+            }
+            if (stepName === 'História') {
+                const historiaInput = document.getElementById('historia');
+                if (!historiaInput.value.trim()) {
+                    markError(historiaInput, '- O campo "A História de Vocês" é obrigatória.');
+                }
+            }
+            if (stepName === 'Cores') {
+                 const paletaInput = document.getElementById('paleta');
+                if (!paletaInput.value.trim()) {
+                    markError(paletaInput, '- O campo "Universo Visual e Cores" é obrigatório.');
+                }
+            }
+            if (stepName === 'Memórias') {
+                const selectedPackage = document.querySelector('input[name="pacote_escolhido"]:checked');
+                let limit = selectedPackage?.id === 'laco' ? 5 : 10;
+                let photoUrls = [];
+                try {
+                    photoUrls = JSON.parse(photoLinksInput.value || '[]');
+                } catch(e) { /* Fica como array vazio */ }
+                
+                if (photoUrls.length === 0) {
+                    markError(document.getElementById('photo-uploader-input'), '- Pelo menos uma foto é obrigatória.');
+                } else if (photoUrls.length > limit) {
+                     markError(document.getElementById('photo-uploader-input'), `- Você enviou ${photoUrls.length} fotos. O limite para este pacote é ${limit}.`);
+                }
+            }
+            
+            return {
+                isValid: errors.length === 0,
+                message: errors.join('\n')
+            };
+        }
+
+        // --- SUBMISSÃO E MODAIS ---
+        async function handleFormSubmit(event) {
+            event.preventDefault(); // Previne o envio padrão do formulário
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Enviando...';
+
+            const formDataObject = {};
+            // Coleta todos os dados dos campos com 'name'
+            new FormData(form).forEach((value, key) => {
+                formDataObject[key] = value;
+            });
+
+            // Garante que o array de fotos seja enviado corretamente
+            try {
+                formDataObject['links_das_fotos'] = JSON.parse(photoLinksInput.value || '[]');
+            } catch(e) {
+                formDataObject['links_das_fotos'] = [];
+            }
+
+            // A URL da sua função Netlify. Será sempre assim.
+            const submissionUrl = '/.netlify/functions/send-email';
+
+            try {
+                const response = await fetch(submissionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formDataObject),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Ocorreu um erro no servidor.');
+                }
+
+                showFinalMessage(true, result.message);
+                formContent.classList.add('hidden'); // Esconde o formulário
+
+            } catch (error) {
+                console.error('Erro na submissão:', error);
+                showFinalMessage(false, `Falha no envio: ${error.message}. Por favor, verifique sua conexão ou tente novamente mais tarde.`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-rocket"></i> Enviar Pedido';
+            }
+        }
+
+        function showFinalMessage(success, message) {
+            finalMessageContainer.innerHTML = `
+                <div class="final-message-content ${success ? 'success' : 'error'}">
+                    <i class="fas ${success ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                    <h2>${success ? 'Enviado com Sucesso!' : 'Ocorreu um Erro'}</h2>
+                    <p>${message}</p>
+                </div>
+            `;
+            finalMessageContainer.classList.remove('hidden');
+        }
+
+        function showAlert(title, message) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('alert-modal').classList.add('visible');
+        }
+
+        // --- EVENT LISTENERS ---
+        packageOptions.forEach(option => { 
+            option.addEventListener('change', () => { 
+                // Volta para o primeiro passo se o pacote mudar após o início
+                if (currentStepIndex > 0) {
+                    currentStepIndex = 0;
+                    showStep(0);
+                }
+                filterVisibleSteps(); 
+            }); 
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const validationResult = validateCurrentStep();
+            if (validationResult.isValid) {
+                currentStepIndex++;
+                filterVisibleSteps();
+                showStep(currentStepIndex);
+            } else {
+                showAlert('Campos Obrigatórios', validationResult.message);
+            }
+        });
+        
+        prevBtn.addEventListener('click', () => {
+            currentStepIndex--;
+            showStep(currentStepIndex);
+        });
+        
+        form.addEventListener("submit", handleFormSubmit);
+
+        // Listener para fechar o modal
+        const alertModal = document.getElementById('alert-modal');
+        alertModal.addEventListener('click', e => { 
+            if (e.target === alertModal || e.target.id === 'modal-close') {
+                alertModal.classList.remove('visible');
+            }
+        });
+        
+        // --- INICIALIZAÇÃO ---
+        filterVisibleSteps();
+        showStep(currentStepIndex);
+    });
+    </script>
+</body>
+</html>
