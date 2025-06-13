@@ -88,8 +88,8 @@
         .hidden { display: none; }
         #final-message { text-align: center; }
         #final-message i { font-size: 4rem; margin-bottom: 1rem; }
-        #final-message.success i { color: var(--cor-dourado-premium); }
-        #final-message.error i { color: var(--cor-erro); }
+        #final-message .success i { color: var(--cor-dourado-premium); }
+        #final-message .error i { color: var(--cor-erro); }
         #final-message h2 { margin-bottom: 1rem; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
         .modal-overlay.visible { opacity: 1; visibility: visible; }
@@ -488,7 +488,7 @@
             if (stepName === 'Cores') {
                  const paletaInput = document.getElementById('paleta');
                 if (!paletaInput.value.trim()) {
-                    markError(paletaInput, '- O campo "Universo Visual e Cores" é obrigatório.');
+                    markError(paletaInput, '- O campo "Universo Visual e Cores" é obrigatória.');
                 }
             }
             if (stepName === 'Memórias') {
@@ -541,12 +541,25 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formDataObject),
                 });
-
-                const result = await response.json();
+                
+                // *** INÍCIO DA CORREÇÃO ***
+                // Lê a resposta como texto primeiro para evitar erros
+                const responseText = await response.text();
 
                 if (!response.ok) {
-                    throw new Error(result.message || 'Ocorreu um erro no servidor.');
+                    // Se a resposta não for OK, lança um erro com o texto recebido
+                    throw new Error(responseText || `O servidor respondeu com um erro ${response.status}.`);
                 }
+
+                // Tenta analisar o texto como JSON apenas se a resposta for OK
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    // Se a análise falhar, houve um problema inesperado no servidor
+                    throw new Error('A resposta do servidor não estava no formato esperado.');
+                }
+                // *** FIM DA CORREÇÃO ***
 
                 showFinalMessage(true, result.message);
                 formContent.classList.add('hidden'); // Esconde o formulário
